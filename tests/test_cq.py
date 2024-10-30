@@ -13,6 +13,7 @@ from pyverbs.pyverbs_error import PyverbsRDMAError
 from pyverbs.base import PyverbsRDMAErrno
 from pyverbs.cq import CompChannel, CQ
 import tests.irdma_base as irdma
+import tests.bnxt_base as bnxt
 from pyverbs.qp import QPCap
 import pyverbs.device as d
 import tests.utils as u
@@ -117,7 +118,7 @@ class CQTest(RDMATestCase):
                         f'The actual CQ size ({self.client.cq.cqe}) is less '
                         'than guaranteed ({new_cq_size})')
 
-        irdma.skip_if_irdma_dev(d.Context(name=self.dev_name))
+        self.skip_unsupported_devices(self.dev_name)
         # Fill the CQ entries except one for avoid cq_overrun warnings.
         send_wr, _ = u.get_send_elements(self.client, False)
         ah_client = u.get_global_ah(self.client, self.gid_index, self.ib_port)
@@ -129,3 +130,12 @@ class CQTest(RDMATestCase):
         with self.assertRaises(PyverbsRDMAError) as ex:
             self.client.cq.resize(new_cq_size)
         self.assertEqual(ex.exception.error_code, errno.EINVAL)
+
+
+    def skip_unsupported_devices(self, dev_name):
+       """
+       Check if the device is one of the devices that
+       does not support the test scenario and skip it.
+       """
+       irdma.skip_if_irdma_dev(d.Context(name=dev_name))
+       bnxt.skip_if_bnxt_dev(d.Context(name=dev_name))

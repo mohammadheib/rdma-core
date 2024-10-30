@@ -12,6 +12,7 @@ rdma_python_test(tests
   mlx5_base.py
   mlx5_prm_structs.py
   rdmacm_utils.py
+  bnxt_base.py
   test_addr.py
   test_atomic.py
   test_cq.py
